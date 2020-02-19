@@ -61,6 +61,8 @@ public class Robot extends TimedRobot {
 
   private Integer _reverseAxisInt = 6; 
 
+  private Integer _wheelSpinnerInt= 7;
+
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
   private Integer _centerAutoSTG1 = 500;
@@ -84,6 +86,8 @@ public class Robot extends TimedRobot {
   private Double _intakeRevSpeed = -0.55;
   private Double _beltSpeed = 0.9;
   private Double _beltRevSpeed = -0.5;
+
+  private Double _wheelSpinSpeed = 0.5;
 
 //Servo position
 
@@ -110,6 +114,8 @@ public class Robot extends TimedRobot {
   private Toggle _servoTog = new Toggle();
 
   private Toggle _reverseAxisTog = new Toggle();
+
+  private Toggle _wheelSpinTog = new Toggle();
 
 //Drive Train----------------------------------------------------------------------------------------------------------------------------
   
@@ -151,6 +157,10 @@ Encoder enc;
 
   private DigitalInput _bottomSwitch = new DigitalInput(0);
   private DigitalInput _topSwitch = new DigitalInput(1);
+
+//Color Wheel Motor(Falcon) ------------------------------------------------------------------------------------------------------
+
+private TalonFX _colorWheelMotor = new TalonFX (11);
   
 //test--------------------------------------------------------------------------------------------------------------------
 
@@ -394,6 +404,14 @@ Encoder enc;
 
   }
   
+  if(_wheelSpinTog.toggleHeld(_joystick, _wheelSpinnerInt)){
+    
+    _colorWheelMotor.set(_wheelSpinSpeed);
+
+  }else{
+    _colorWheelMotor.set(0);
+  }
+
   }
 
   /**
