@@ -7,34 +7,22 @@
 
 package frc.robot;
 
-import com.kauailabs.navx.frc.AHRS;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-import com.fasterxml.jackson.core.format.InputAccessor.Std;
 
-import edu.wpi.first.hal.sim.EncoderSim;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Sendable;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer; 
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import sun.nio.ch.Net;
 
 
 /**
@@ -52,8 +40,6 @@ public class Robot extends TimedRobot {
 
   //Button Values----------------------------------------------------------------------------------------------------------------
 
-  private Integer _transSolenoidInt = 2;
-
   private Integer _upClimbInt = 12;
   private Integer _downClimbInt = 11;
 
@@ -61,11 +47,12 @@ public class Robot extends TimedRobot {
   private Integer _launchInt = 1;
   private Integer _lowLaunchInt = 5;
   private Integer _reverseInt = 4;
-  private Integer _servoInt = 10;
 
   private Integer _reverseAxisInt = 6; 
 
-  private Integer _wheelSpinnerInt= 7;
+  private Integer _wheelSpinnerInt = 7;
+
+  private Integer _limelightTestInt = 2;
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
@@ -80,7 +67,6 @@ public class Robot extends TimedRobot {
 //Motor Speeds
 
   private Double _upClimbMotorSTG1 = 0.7;
-  private Double _upClimbMotorSTG2 = -0.3; 
   private Double _downClimbMotorSTG1 = -0.8; 
   
   private Double _launcherSpeed = 1.0;
@@ -93,19 +79,9 @@ public class Robot extends TimedRobot {
 
   private Double _wheelSpinSpeed = 0.5;
 
-//Servo position
-
-  private Double _servoLaunchPos = 0.5;
-  private Double _servoNeutralPos = 0.3; 
-
-//Gyro positions
-
-  
-  
+  private Double _autonMotorSpeed = 0.5;
 
 //Toggle--------------------------------------------------------------------------------------------------------------------------------------
-  
-  private Toggle _transSolenoidTog = new Toggle();
   
   private Toggle _upClimbTog = new Toggle();
   private Toggle _downClimbTog = new Toggle();
@@ -115,32 +91,25 @@ public class Robot extends TimedRobot {
   private Toggle _lowLaunchTog = new Toggle();
   private Toggle _reverseTog = new Toggle();
 
-  private Toggle _servoTog = new Toggle();
-
   private Toggle _reverseAxisTog = new Toggle();
 
   private Toggle _wheelSpinTog = new Toggle();
 
+  private Toggle _limelightTestTog = new Toggle();
+
 //Drive Train----------------------------------------------------------------------------------------------------------------------------
   
-  private VictorSPX _frontRightMotor = new VictorSPX(4);
-  private VictorSPX _frontLeftMotor = new VictorSPX(2);
+  private WPI_TalonSRX _frontRightMotor = new WPI_TalonSRX(3);
+  private WPI_TalonSRX _frontLeftMotor = new WPI_TalonSRX(1);
 
-  private WPI_TalonSRX _backRightMotor = new WPI_TalonSRX(3);
-  private WPI_TalonSRX _backLeftMotor = new WPI_TalonSRX(1);
+  private VictorSPX _backRightMotor = new VictorSPX(4);
+  private VictorSPX _backLeftMotor = new VictorSPX(2);
 
-  private DifferentialDrive _drive = new DifferentialDrive(_backRightMotor, _backLeftMotor);
-//encoder test
-
-Encoder enc;
+  private DifferentialDrive _drive = new DifferentialDrive(_frontRightMotor, _frontLeftMotor);
 
 //Controls-----------------------------------------------------------------------------------------------------------------------------
   
   private Joystick _joystick = new Joystick(0); 
-
-//Transmission
-
-  //private DoubleSolenoid _transSolenoid = new DoubleSolenoid(0, 1);
 
 //Launcher-------------------------------------------------------------------------------------------------------------------------------
 
@@ -151,9 +120,6 @@ Encoder enc;
   private WPI_VictorSPX _leftLaunchMotor = new WPI_VictorSPX(6);
   private WPI_VictorSPX _rightLaunchMotor = new WPI_VictorSPX(5);
   
-  //private Servo _launcherServo = new Servo(0);
-  
- 
 //Climb------------------------------------------------------------------------------------------------------------------
  
   private VictorSPX _upClimbMotor = new VictorSPX(7); 
@@ -162,24 +128,21 @@ Encoder enc;
   private DigitalInput _bottomSwitch = new DigitalInput(0);
   private DigitalInput _topSwitch = new DigitalInput(1);
 
-//Color Wheel Motor(Falcon) ------------------------------------------------------------------------------------------------------
+//Color Wheel Motor ------------------------------------------------------------------------------------------------------
 
-private TalonFX _colorWheelMotor = new TalonFX (11);
+  private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11); 
   
-//test--------------------------------------------------------------------------------------------------------------------
-
-  // AHRS _gyro = new AHRS(I2C.Port.kMXP);
-  // double heading;
-  // double rotateToAngleRate;
+//Auton--------------------------------------------------------------------------------------------------------------------
 
   private Timer _autonTimer = new Timer();
 
-  // static final double kP = 1;
-  // static final double kI = 0.00f;
-  // static final double kD = 0.00f;
-  // static final double kF = 0.00f;
+//Test-------------------------------------------------------------------------------------
 
-  private NetworkTableInstance _limelight;
+  private boolean _limelightHasValidTarget = false;
+  private double _limelightDriveCommand = 0.0;
+  private double _limelightSteerCommand = 0.0;
+
+  
 
 
   
@@ -198,39 +161,27 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
 
   //Drive-------------------------------------------------------------------------------------------------------------
 
-    _frontLeftMotor.follow(_backLeftMotor);
-    _frontRightMotor.follow(_backRightMotor);
+    _backLeftMotor.follow(_frontLeftMotor);
+    _backRightMotor.follow(_frontRightMotor);
 
-    _frontLeftMotor.setNeutralMode(NeutralMode.Brake);
-    _frontRightMotor.setNeutralMode(NeutralMode.Brake);
     _backLeftMotor.setNeutralMode(NeutralMode.Brake);
     _backRightMotor.setNeutralMode(NeutralMode.Brake);
+    _frontLeftMotor.setNeutralMode(NeutralMode.Brake);
+    _frontRightMotor.setNeutralMode(NeutralMode.Brake);
 
-    
-
-
-  //Pneumatics--------------------------------------------------------------------------------------------------------------------------------
-
-    //_transSolenoid.set(Value.kReverse);
-
-  //Launcher
+  //Launcher-----------------------------------------------------------------------------------------
 
     _rightLaunchMotor.setInverted(true);
     _intakeMotor.setInverted(true);
 
-  //Auton test
+  //Encoder--------------------------------------------------------------------------------------------
 
-    //Shuffleboard.getTab("Gyro").add((Sendable) _gyro); 
-    //_gyro.getCompassHeading();
+    _frontLeftMotor.setSelectedSensorPosition(0); 
 
-    //enc = new Encoder(0, 1);
-    //System.out.println(enc.getDistance()); 
+  //test
 
-    _limelight.getDefault().getTable("limelight").getEntry("<variablename>").setNumber(1);
-    float Kp = -0.1f;
-    float min_command = 0.05f;
-    float tx = table = GetNumber("tx");
-    float tx = table = GetNumber("tx"); 
+    
+    
         
     
 
@@ -247,10 +198,7 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
   @Override
   public void robotPeriodic() {
 
-    //double dist = enc.getDistance();
-    //SmartDashboard.putNumber("Encoder", dist);
-
-    System.out.println(_backLeftMotor.getSelectedSensorPosition());
+    System.out.println(_frontLeftMotor.getSelectedSensorPosition());
 
   }
 
@@ -274,7 +222,7 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
     _autonTimer.start();
     _autonTimer.reset();
 
-    //heading = _gyro.getAngle();
+    
 
   }
 
@@ -288,7 +236,7 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
       
        if (_autonTimer.get() < 15.0){
 
-         _drive.tankDrive(.5, .5);
+         _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
 
        }else{
 
@@ -296,10 +244,9 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
         
        }
         break;
+
       case _shootingAuton:
       default:
-
-      //double error = heading - _gyro.getAngle();
       
       if (_autonTimer.get() < 10.0){
 
@@ -310,7 +257,7 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
       
       }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
 
-        _drive.tankDrive(0.5, 0.5);
+        _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
       
       }else{
 
@@ -326,12 +273,18 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
   @Override
   public void teleopPeriodic() {
 
+    Update_Limelight_Tracking();
+
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
     if(_reverseAxisTog.togglePressed(_joystick, _reverseAxisInt)){
 
       _drive.arcadeDrive(_joystick.getY(),- _joystick.getX());
     
+  }else if(_limelightTestTog.toggleHeld(_joystick, _limelightTestInt) && _limelightHasValidTarget){
+
+    _drive.arcadeDrive(_limelightDriveCommand, _limelightSteerCommand);
+  
   }else{
 
       _drive.arcadeDrive(-_joystick.getY(), -_joystick.getX());
@@ -347,7 +300,6 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
   }else if(_downClimbTog.toggleHeld(_joystick, _downClimbInt) && _topSwitch.get()){
 
       _downClimbMotor.set(ControlMode.PercentOutput, _downClimbMotorSTG1);
-      //_upClimbMotor.set(ControlMode.PercentOutput, _upClimbMotorSTG2);
 
   }else{
 
@@ -355,21 +307,8 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
       _upClimbMotor.set(ControlMode.PercentOutput, 0);
   
   }
-
-  //Transmission--------------------------------------------------------------------------------------------------
-    
-    if(_transSolenoidTog.togglePressed(_joystick, _transSolenoidInt)){
-      
-      //_transSolenoid.set(DoubleSolenoid.Value.kForward);
-  
-  }else{
-
-      //_transSolenoid.set(DoubleSolenoid.Value.kReverse);
-    
-    }
-  
-    
-  //Launcher
+     
+  //Launcher----------------------------------------------------------------------------------------------------------------------
     
     if(_intakeTog.toggleHeld(_joystick, _intakeInt)){
       
@@ -401,21 +340,12 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
       _rightLaunchMotor.set(0);
       _beltMotor.set(0);
       _intakeMotor.set(0);
-      //_launcherServo.set(0);
       _leftLaunchMotor.setNeutralMode(NeutralMode.Brake);
       _rightLaunchMotor.setNeutralMode(NeutralMode.Brake);
     
     }
 
-  if(_servoTog.toggleHeld(_joystick, _servoInt)){
-
-      //_launcherServo.setPosition(_servoLaunchPos);
-  
-  }else{
-
-      //_launcherServo.setPosition(_servoNeutralPos);
-
-  }
+  //Wheel spinner---------------------------------------------------------------------------------------------
   
   if(_wheelSpinTog.toggleHeld(_joystick, _wheelSpinnerInt)){
     
@@ -423,9 +353,10 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
 
   }else{
     
-    //_colorWheelMotor.set(0);
     
   }
+
+  
 
   }
 
@@ -434,5 +365,42 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
    */
   @Override
   public void testPeriodic() {
+  }
+
+  public void Update_Limelight_Tracking()
+  {
+
+    final double _steerspeed = 0.03;
+    final double _drivespeed = 0.26;
+    final double _desired_Target_Area = 13.0; 
+    final double _max_drivespeed = 0.7;
+
+    
+    double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
+    double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+    double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+    double ta = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
+
+    if(tv < 1.0){
+
+      _limelightHasValidTarget = false;
+      _limelightDriveCommand = 0.0;
+      _limelightSteerCommand = 0.0;
+      return;
+    }
+
+    _limelightHasValidTarget = true;
+
+    double _steercmd = tx * _steerspeed;
+    _limelightSteerCommand = _steercmd;
+
+    double _drivecmd = (_desired_Target_Area - ta) * _drivespeed;
+
+    if(_drivecmd > _max_drivespeed){
+
+      _drivecmd = _max_drivespeed;
+    }
+    _limelightDriveCommand = _drivecmd;
+
   }
 }
