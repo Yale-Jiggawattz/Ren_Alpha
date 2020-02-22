@@ -11,9 +11,11 @@ import com.kauailabs.navx.frc.AHRS;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.fasterxml.jackson.core.format.InputAccessor.Std;
 
 import edu.wpi.first.hal.sim.EncoderSim;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -28,9 +30,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer; 
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import sun.nio.ch.Net;
 
 
 /**
@@ -175,6 +179,9 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
   // static final double kD = 0.00f;
   // static final double kF = 0.00f;
 
+  private NetworkTableInstance _limelight;
+
+
   
 
   
@@ -191,8 +198,6 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
 
   //Drive-------------------------------------------------------------------------------------------------------------
 
-    // _backLeftMotor.follow(_frontLeftMotor); 
-    // _backRightMotor.follow(_frontRightMotor);
     _frontLeftMotor.follow(_backLeftMotor);
     _frontRightMotor.follow(_backRightMotor);
 
@@ -200,6 +205,8 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
     _frontRightMotor.setNeutralMode(NeutralMode.Brake);
     _backLeftMotor.setNeutralMode(NeutralMode.Brake);
     _backRightMotor.setNeutralMode(NeutralMode.Brake);
+
+    
 
 
   //Pneumatics--------------------------------------------------------------------------------------------------------------------------------
@@ -219,11 +226,13 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
     //enc = new Encoder(0, 1);
     //System.out.println(enc.getDistance()); 
 
-    System.out.println(_frontLeftMotor.getActiveTrajectoryPosition(0));
-    System.out.println(_frontRightMotor.getActiveTrajectoryPosition(0));
+    _limelight.getDefault().getTable("limelight").getEntry("<variablename>").setNumber(1);
+    float Kp = -0.1f;
+    float min_command = 0.05f;
+    float tx = table = GetNumber("tx");
+    float tx = table = GetNumber("tx"); 
+        
     
-    
-
 
   }
 
@@ -240,6 +249,9 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
 
     //double dist = enc.getDistance();
     //SmartDashboard.putNumber("Encoder", dist);
+
+    System.out.println(_backLeftMotor.getSelectedSensorPosition());
+
   }
 
   /**
@@ -318,11 +330,11 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
 
     if(_reverseAxisTog.togglePressed(_joystick, _reverseAxisInt)){
 
-      _drive.arcadeDrive(_joystick.getY(), _joystick.getX());
+      _drive.arcadeDrive(_joystick.getY(),- _joystick.getX());
     
   }else{
 
-      _drive.arcadeDrive(-_joystick.getY(), _joystick.getX());
+      _drive.arcadeDrive(-_joystick.getY(), -_joystick.getX());
 
     }    
 
@@ -370,6 +382,7 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
       _rightLaunchMotor.set(_launcherSpeed);
       _beltMotor.set(_beltSpeed);
       _intakeMotor.set(_intakeSpeed);
+      
 
   }else if(_reverseTog.toggleHeld(_joystick, _reverseInt)){
       
@@ -406,10 +419,12 @@ private TalonFX _colorWheelMotor = new TalonFX (11);
   
   if(_wheelSpinTog.toggleHeld(_joystick, _wheelSpinnerInt)){
     
-    _colorWheelMotor.set(_wheelSpinSpeed);
+    
 
   }else{
-    _colorWheelMotor.set(0);
+    
+    //_colorWheelMotor.set(0);
+    
   }
 
   }
