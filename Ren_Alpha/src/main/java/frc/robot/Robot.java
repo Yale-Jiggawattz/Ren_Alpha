@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
   private static final String _shootingAuton = "Shooting";
-  private static final String _ctlAuton = "Cross the line";
+  private static final String _ctlAuton = "Cross the Line";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
 
   private Integer _wheelSpinnerInt = 7;
 
-  private Integer _limelightTestInt = 2;
+  private Integer _limelightInt = 2;
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
@@ -67,19 +67,21 @@ public class Robot extends TimedRobot {
 //Motor Speeds
 
   private Double _upClimbMotorSTG1 = 0.7;
-  private Double _downClimbMotorSTG1 = -0.8; 
+  private Double _downClimbMotorSTG1 = 0.8; 
   
   private Double _launcherSpeed = 1.0;
   private Double _lowLauncherSpeed = 0.2;
 
-  private Double _intakeSpeed = 0.55; 
-  private Double _intakeRevSpeed = -0.55;
-  private Double _beltSpeed = 0.9;
-  private Double _beltRevSpeed = -0.5;
+  private Double _intakeSpeed = 0.42; 
+  private Double _intakeRevSpeed = -0.42;
+  private Double _topBeltSpeed = 0.9;
+  private Double _bottomBeltSpeed = 0.9;
+  private Double _topRevBeltSpeed = -0.5;
+  private Double _bottomRevBeltSpeed = -0.5;
 
-  private Double _wheelSpinSpeed = 0.5;
+  private Double _wheelSpinSpeed = 0.1;
 
-  private Double _autonMotorSpeed = 0.5;
+  private Double _autonMotorSpeed = 0.2;
 
 //Toggle--------------------------------------------------------------------------------------------------------------------------------------
   
@@ -115,10 +117,17 @@ public class Robot extends TimedRobot {
 
   private WPI_VictorSPX _intakeMotor = new WPI_VictorSPX(8);
 
-  private WPI_VictorSPX _beltMotor = new WPI_VictorSPX(9);
+  private WPI_VictorSPX _topBeltMotor = new WPI_VictorSPX(9);
+  private WPI_VictorSPX _bottomBeltMotor = new WPI_VictorSPX(12);
 
   private WPI_VictorSPX _leftLaunchMotor = new WPI_VictorSPX(6);
   private WPI_VictorSPX _rightLaunchMotor = new WPI_VictorSPX(5);
+
+//Limelight--------------------------------------------------------------------------------------------
+
+  private boolean _limelightHasValidTarget = false;
+  private double _limelightDriveCommand = 0.0;
+  private double _limelightSteerCommand = 0.0;
   
 //Climb------------------------------------------------------------------------------------------------------------------
  
@@ -135,12 +144,6 @@ public class Robot extends TimedRobot {
 //Auton--------------------------------------------------------------------------------------------------------------------
 
   private Timer _autonTimer = new Timer();
-
-//Test-------------------------------------------------------------------------------------
-
-  private boolean _limelightHasValidTarget = false;
-  private double _limelightDriveCommand = 0.0;
-  private double _limelightSteerCommand = 0.0;
 
   
 
@@ -178,12 +181,9 @@ public class Robot extends TimedRobot {
 
     _frontLeftMotor.setSelectedSensorPosition(0); 
 
-  //test
+  //Wheel_Spinner----------------------------------------------------------------------------------------
 
-    
-    
-        
-    
+  _colorWheelMotor.setNeutralMode(NeutralMode.Brake);
 
   }
 
@@ -216,7 +216,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", _shootingAuton);
+    m_autoSelected = SmartDashboard.getString("Auto Selector", _shootingAuton);
+    m_autoSelected = SmartDashboard.getString("Auto Selector", _ctlAuton);
     System.out.println("Auto selected: " + m_autoSelected);
 
     _autonTimer.start();
@@ -234,14 +235,17 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
       case _ctlAuton:
       
-       if (_autonTimer.get() < 15.0){
+       if (_autonTimer.get() < 15.0 && _frontLeftMotor.getSelectedSensorPosition() > -1000){
 
-         _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
+         _drive.arcadeDrive(.25, 0);
+         _leftLaunchMotor.set(_launcherSpeed);
+         System.out.println("Move back");
 
        }else{
 
          _drive.arcadeDrive(0, 0);
-        
+        System.out.println("Stop");
+
        }
         break;
 
@@ -252,7 +256,7 @@ public class Robot extends TimedRobot {
 
         _leftLaunchMotor.set(_launcherSpeed);
         _rightLaunchMotor.set(_launcherSpeed);
-        _beltMotor.set(_beltSpeed);
+        _topBeltMotor.set(_topBeltSpeed);
         
       
       }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
@@ -281,9 +285,11 @@ public class Robot extends TimedRobot {
 
       _drive.arcadeDrive(_joystick.getY(),- _joystick.getX());
     
-  }else if(_limelightTestTog.toggleHeld(_joystick, _limelightTestInt) && _limelightHasValidTarget){
+  }else if(_limelightTestTog.toggleHeld(_joystick, _limelightInt) && _limelightHasValidTarget){
 
-    _drive.arcadeDrive(_limelightDriveCommand, _limelightSteerCommand);
+    _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
+    _leftLaunchMotor.set(_launcherSpeed);
+    _rightLaunchMotor.set(_launcherSpeed);
   
   }else{
 
@@ -313,32 +319,37 @@ public class Robot extends TimedRobot {
     if(_intakeTog.toggleHeld(_joystick, _intakeInt)){
       
       _intakeMotor.set(_intakeSpeed);
-      _beltMotor.set(_beltSpeed);
+      _topBeltMotor.set(_topBeltSpeed);
+      _bottomBeltMotor.set(_bottomBeltSpeed);
+      
     
   }else if(_launchTog.toggleHeld(_joystick, _launchInt)){
       
       _leftLaunchMotor.set(_launcherSpeed);
       _rightLaunchMotor.set(_launcherSpeed);
-      _beltMotor.set(_beltSpeed);
+      _topBeltMotor.set(_topBeltSpeed);
+      _bottomBeltMotor.set(_bottomBeltSpeed);
       _intakeMotor.set(_intakeSpeed);
       
 
   }else if(_reverseTog.toggleHeld(_joystick, _reverseInt)){
       
-      _beltMotor.set(_beltRevSpeed);
+      _topBeltMotor.set(_topRevBeltSpeed);
+      _bottomBeltMotor.set(_bottomRevBeltSpeed);
       _intakeMotor.set(_intakeRevSpeed);
     
   }else if(_lowLaunchTog.toggleHeld(_joystick, _lowLaunchInt)){
 
       _leftLaunchMotor.set(_lowLauncherSpeed);
       _rightLaunchMotor.set(_lowLauncherSpeed);
-      _beltMotor.set(_beltSpeed);
+      _topBeltMotor.set(_topBeltSpeed);
+      _bottomBeltMotor.set(_bottomBeltSpeed);
 
   }else{
       
       _leftLaunchMotor.set(0);
       _rightLaunchMotor.set(0);
-      _beltMotor.set(0);
+      _topBeltMotor.set(0);
       _intakeMotor.set(0);
       _leftLaunchMotor.setNeutralMode(NeutralMode.Brake);
       _rightLaunchMotor.setNeutralMode(NeutralMode.Brake);
@@ -349,10 +360,11 @@ public class Robot extends TimedRobot {
   
   if(_wheelSpinTog.toggleHeld(_joystick, _wheelSpinnerInt)){
     
-    
+    _colorWheelMotor.set(_wheelSpinSpeed);
 
   }else{
-    
+
+    _colorWheelMotor.set(0);
     
   }
 
@@ -367,13 +379,13 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
   }
 
-  public void Update_Limelight_Tracking()
-  {
+  public void Update_Limelight_Tracking(){
 
-    final double _steerspeed = 0.03;
+    final double _steerspeed = 0.26;
     final double _drivespeed = 0.26;
-    final double _desired_Target_Area = 13.0; 
+    final double _desired_Target_Area = 1.0; 
     final double _max_drivespeed = 0.7;
+    final double _max_steerspeed = 0.7;
 
     
     double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
@@ -394,13 +406,19 @@ public class Robot extends TimedRobot {
     double _steercmd = tx * _steerspeed;
     _limelightSteerCommand = _steercmd;
 
+      if(_steercmd > _max_steerspeed){
+
+        _steercmd = _max_steerspeed;
+      }
+
     double _drivecmd = (_desired_Target_Area - ta) * _drivespeed;
 
-    if(_drivecmd > _max_drivespeed){
+     if(_drivecmd > _max_drivespeed){
 
-      _drivecmd = _max_drivespeed;
-    }
-    _limelightDriveCommand = _drivecmd;
+       _drivecmd = _max_drivespeed;
+     
+      }
+     _limelightDriveCommand = _drivecmd;
 
-  }
+   }
 }
