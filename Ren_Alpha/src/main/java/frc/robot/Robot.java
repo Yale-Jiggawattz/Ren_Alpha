@@ -9,7 +9,6 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -56,13 +55,7 @@ public class Robot extends TimedRobot {
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
-  private Integer _centerAutoSTG1 = 500;
-  
-  private Integer _leftAutoSTG1 = 500;
-  private Integer _leftAutoSTG2 = 1000;
 
-  private Integer _rightAutoSTG1 = 500;
-  private Integer _rightAutoSTG2 = 1000;
 
 //Motor Speeds
 
@@ -137,20 +130,13 @@ public class Robot extends TimedRobot {
   private DigitalInput _bottomSwitch = new DigitalInput(0);
   private DigitalInput _topSwitch = new DigitalInput(1);
 
-//Color Wheel Motor ------------------------------------------------------------------------------------------------------
+//Color Wheel------------------------------------------------------------------------------------------------------
 
   private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11); 
   
 //Auton--------------------------------------------------------------------------------------------------------------------
 
   private Timer _autonTimer = new Timer();
-
-  
-
-
-  
-
-  
 
   /**
    * This function is run when the robot is first started up and should be
@@ -222,8 +208,6 @@ public class Robot extends TimedRobot {
 
     _autonTimer.start();
     _autonTimer.reset();
-
-    
 
   }
 
@@ -367,9 +351,6 @@ public class Robot extends TimedRobot {
     _colorWheelMotor.set(0);
     
   }
-
-  
-
   }
 
   /**
