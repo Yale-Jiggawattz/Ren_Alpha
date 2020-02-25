@@ -37,7 +37,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  //Button Values----------------------------------------------------------------------------------------------------------------
+//Button Values----------------------------------------------------------------------------------------------------------------
 
   private Integer _upClimbInt = 12;
   private Integer _downClimbInt = 11;
