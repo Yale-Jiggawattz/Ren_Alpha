@@ -69,7 +69,7 @@ public class Robot extends TimedRobot {
   private Double _upClimbMotorSTG1 = 0.7;
   private Double _downClimbMotorSTG1 = 0.8; 
   
-  private Double _launcherSpeed = 1.0;
+  private Double _launcherSpeed = 0.8;
   private Double _lowLauncherSpeed = 0.2;
 
   private Double _intakeSpeed = 0.42; 
@@ -137,9 +137,10 @@ public class Robot extends TimedRobot {
   private DigitalInput _bottomSwitch = new DigitalInput(0);
   private DigitalInput _topSwitch = new DigitalInput(1);
 
-//Color Wheel Motor ------------------------------------------------------------------------------------------------------
+//Color_Wheel------------------------------------------------------------------------------------------------------
 
-  private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11); 
+  private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11);
+   
   
 //Auton--------------------------------------------------------------------------------------------------------------------
 
@@ -319,18 +320,13 @@ public class Robot extends TimedRobot {
     if(_intakeTog.toggleHeld(_joystick, _intakeInt)){
       
       _intakeMotor.set(_intakeSpeed);
-      _topBeltMotor.set(_topBeltSpeed);
-      _bottomBeltMotor.set(_bottomBeltSpeed);
       
-    
   }else if(_launchTog.toggleHeld(_joystick, _launchInt)){
       
       _leftLaunchMotor.set(_launcherSpeed);
       _rightLaunchMotor.set(_launcherSpeed);
       _topBeltMotor.set(_topBeltSpeed);
       _bottomBeltMotor.set(_bottomBeltSpeed);
-      _intakeMotor.set(_intakeSpeed);
-      
 
   }else if(_reverseTog.toggleHeld(_joystick, _reverseInt)){
       
