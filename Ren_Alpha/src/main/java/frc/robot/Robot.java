@@ -9,7 +9,6 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -38,7 +37,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  //Button Values----------------------------------------------------------------------------------------------------------------
+//Button Values----------------------------------------------------------------------------------------------------------------
 
   private Integer _upClimbInt = 12;
   private Integer _downClimbInt = 11;
@@ -56,18 +55,12 @@ public class Robot extends TimedRobot {
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
-  private Integer _centerAutoSTG1 = 500;
-  
-  private Integer _leftAutoSTG1 = 500;
-  private Integer _leftAutoSTG2 = 1000;
 
-  private Integer _rightAutoSTG1 = 500;
-  private Integer _rightAutoSTG2 = 1000;
 
 //Motor Speeds
 
-  private Double _upClimbMotorSTG1 = 0.7;
-  private Double _downClimbMotorSTG1 = 0.8; 
+  private Double _upClimbMotorSpeed = 0.7;
+  private Double _downClimbMotorSpeed = 0.8; 
   
   private Double _launcherSpeed = 0.8;
   private Double _lowLauncherSpeed = 0.2;
@@ -137,7 +130,7 @@ public class Robot extends TimedRobot {
   private DigitalInput _bottomSwitch = new DigitalInput(0);
   private DigitalInput _topSwitch = new DigitalInput(1);
 
-//Color_Wheel------------------------------------------------------------------------------------------------------
+//Color Wheel------------------------------------------------------------------------------------------------------
 
   private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11);
    
@@ -145,13 +138,6 @@ public class Robot extends TimedRobot {
 //Auton--------------------------------------------------------------------------------------------------------------------
 
   private Timer _autonTimer = new Timer();
-
-  
-
-
-  
-
-  
 
   /**
    * This function is run when the robot is first started up and should be
@@ -223,8 +209,6 @@ public class Robot extends TimedRobot {
 
     _autonTimer.start();
     _autonTimer.reset();
-
-    
 
   }
 
@@ -302,11 +286,11 @@ public class Robot extends TimedRobot {
 
     if(_upClimbTog.toggleHeld(_joystick, _upClimbInt) && _bottomSwitch.get()){
 
-      _upClimbMotor.set(ControlMode.PercentOutput, _upClimbMotorSTG1);
+      _upClimbMotor.set(ControlMode.PercentOutput, _upClimbMotorSpeed);
     
   }else if(_downClimbTog.toggleHeld(_joystick, _downClimbInt) && _topSwitch.get()){
 
-      _downClimbMotor.set(ControlMode.PercentOutput, _downClimbMotorSTG1);
+      _downClimbMotor.set(ControlMode.PercentOutput, _downClimbMotorSpeed);
 
   }else{
 
@@ -363,9 +347,6 @@ public class Robot extends TimedRobot {
     _colorWheelMotor.set(0);
     
   }
-
-  
-
   }
 
   /**
