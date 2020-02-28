@@ -13,15 +13,20 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer; 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 
 
 /**
@@ -32,8 +37,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String _shootingAuton = "Shooting";
-  private static final String _ctlAuton = "Cross the Line";
+  //private static final String _shootingAuton = "Shooting";
+  private static final String _highShootAuto = "High Shoot Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -55,7 +60,12 @@ public class Robot extends TimedRobot {
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
+//Color Wheel Values
 
+private final Color _blueVal = ColorMatch.makeColor(0.143, 0.427, 0.429);
+private final Color _greenVal = ColorMatch.makeColor(0.197, 0.561, 0.240);
+private final Color _redVal = ColorMatch.makeColor(0.561, 0.232, 0.114);
+private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
 //Motor Speeds
 
@@ -133,7 +143,11 @@ public class Robot extends TimedRobot {
 //Color Wheel------------------------------------------------------------------------------------------------------
 
   private WPI_TalonFX _colorWheelMotor = new WPI_TalonFX (11);
-   
+
+  private final I2C.Port i2cPort = I2C.Port.kOnboard;
+  private final ColorSensorV3 _colorSensor = new ColorSensorV3(i2cPort);
+  private final ColorMatch _colorMatcher = new ColorMatch();
+  
   
 //Auton--------------------------------------------------------------------------------------------------------------------
 
@@ -145,8 +159,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Shooting", _shootingAuton);
-    m_chooser.addOption("Cross the Line", _ctlAuton);
+    //m_chooser.setDefaultOption("Shooting", _shootingAuton);  
+    m_chooser.addOption("Cross the Line", _highShootAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
   //Drive-------------------------------------------------------------------------------------------------------------
@@ -171,6 +185,11 @@ public class Robot extends TimedRobot {
   //Wheel_Spinner----------------------------------------------------------------------------------------
 
   _colorWheelMotor.setNeutralMode(NeutralMode.Brake);
+
+  _colorMatcher.addColorMatch(_blueVal);
+  _colorMatcher.addColorMatch(_greenVal);
+  _colorMatcher.addColorMatch(_redVal);
+  _colorMatcher.addColorMatch(_yellowVal);
 
   }
 
@@ -203,8 +222,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    m_autoSelected = SmartDashboard.getString("Auto Selector", _shootingAuton);
-    m_autoSelected = SmartDashboard.getString("Auto Selector", _ctlAuton);
+    //m_autoSelected = SmartDashboard.getString("Auto Selector", _shootingAuton);
+    m_autoSelected = SmartDashboard.getString("Auto Selector", _highShootAuto);
     System.out.println("Auto selected: " + m_autoSelected);
 
     _autonTimer.start();
@@ -217,42 +236,47 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+
+    Update_Limelight_Tracking();
+
     switch (m_autoSelected) {
-      case _ctlAuton:
-      
-       if (_autonTimer.get() < 15.0 && _frontLeftMotor.getSelectedSensorPosition() > -1000){
-
-         _drive.arcadeDrive(.25, 0);
-         _leftLaunchMotor.set(_launcherSpeed);
-         System.out.println("Move back");
-
-       }else{
-
-         _drive.arcadeDrive(0, 0);
-        System.out.println("Stop");
-
-       }
-        break;
-
-      case _shootingAuton:
+      case _highShootAuto:
       default:
       
-      if (_autonTimer.get() < 10.0){
+       if (_autonTimer.get() < 5.0){
+
+         _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
+
+       }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 15.0){
 
         _leftLaunchMotor.set(_launcherSpeed);
         _rightLaunchMotor.set(_launcherSpeed);
-        _topBeltMotor.set(_topBeltSpeed);
+
+       }else{
+
+        _drive.arcadeDrive(0, 0);
+       }
+        break;
+
+      //case _shootingAuton:
+      // default:
+      
+      // if (_autonTimer.get() < 10.0){
+
+      //   _leftLaunchMotor.set(_launcherSpeed);
+      //   _rightLaunchMotor.set(_launcherSpeed);
+      //   _topBeltMotor.set(_topBeltSpeed);
         
       
-      }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
+      // }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
 
-        _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
+      //   _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
       
-      }else{
+      // }else{
 
-        _drive.tankDrive(0, 0);
-      }
-        break;
+      //   _drive.tankDrive(0, 0);
+      // }
+      //   break;
     }
   }
 
@@ -264,6 +288,8 @@ public class Robot extends TimedRobot {
 
     Update_Limelight_Tracking();
 
+    Color _detectedColor = _colorSensor.getColor();
+
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
     if(_reverseAxisTog.togglePressed(_joystick, _reverseAxisInt)){
@@ -273,8 +299,6 @@ public class Robot extends TimedRobot {
   }else if(_limelightTestTog.toggleHeld(_joystick, _limelightInt) && _limelightHasValidTarget){
 
     _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
-    _leftLaunchMotor.set(_launcherSpeed);
-    _rightLaunchMotor.set(_launcherSpeed);
   
   }else{
 
@@ -347,6 +371,38 @@ public class Robot extends TimedRobot {
     _colorWheelMotor.set(0);
     
   }
+
+  //Color String Test
+
+  String _colorString;
+  ColorMatchResult _match = _colorMatcher.matchClosestColor(_detectedColor);
+
+  if(_match.color == _blueVal){
+
+    _colorString = "Blue";
+
+  }else if(_match.color == _redVal){
+
+    _colorString = "Red";
+
+  }else if(_match.color == _greenVal){
+
+    _colorString = "Green";
+
+  }else if (_match.color == _yellowVal){
+
+    _colorString = "Yellow";
+
+  }else{
+
+    _colorString = "Unkown or No Color";
+  }
+
+  SmartDashboard.putNumber("Red", _detectedColor.red);
+  SmartDashboard.putNumber("Green", _detectedColor.green);
+  SmartDashboard.putNumber("Blue", _detectedColor.blue);
+  SmartDashboard.putNumber("Confidence", _match.confidence);
+  SmartDashboard.putString("Detected Color", _colorString);
   }
 
   /**
