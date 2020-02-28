@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   private Double _upClimbMotorSpeed = 0.7;
   private Double _downClimbMotorSpeed = 0.8; 
   
-  private Double _launcherSpeed = 0.8;
+  private Double _launcherSpeed = 0.95;
   private Double _lowLauncherSpeed = 0.2;
 
   private Double _intakeSpeed = 0.42; 
@@ -170,7 +170,7 @@ public class Robot extends TimedRobot {
 
   //Wheel_Spinner----------------------------------------------------------------------------------------
 
-  _colorWheelMotor.setNeutralMode(NeutralMode.Brake);
+    _colorWheelMotor.setNeutralMode(NeutralMode.Brake);
 
   }
 
@@ -224,6 +224,7 @@ public class Robot extends TimedRobot {
 
          _drive.arcadeDrive(.25, 0);
          _leftLaunchMotor.set(_launcherSpeed);
+         _rightLaunchMotor.set(_launcherSpeed);
          System.out.println("Move back");
 
        }else{
