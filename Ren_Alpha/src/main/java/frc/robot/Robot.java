@@ -84,7 +84,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
   private Double _wheelSpinSpeed = 0.1;
 
-  private Double _autonMotorSpeed = 0.2;
+  private Double _autonDriveSpeed = -0.2;
 
 //Toggle--------------------------------------------------------------------------------------------------------------------------------------
   
@@ -247,10 +247,23 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
          _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
 
-       }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 15.0){
+       }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 13.0){
 
+        _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
         _leftLaunchMotor.set(_launcherSpeed);
         _rightLaunchMotor.set(_launcherSpeed);
+        _topBeltMotor.set(_topBeltSpeed);
+        _bottomBeltMotor.set(_bottomBeltSpeed);
+        _intakeMotor.set(_intakeSpeed);
+
+       }else if(_autonTimer.get() > 13.0 && _autonTimer.get() < 15){
+
+        _drive.arcadeDrive(_autonDriveSpeed, 0);
+        _leftLaunchMotor.set(0);
+        _rightLaunchMotor.set(0);
+        _topBeltMotor.set(0);
+        _bottomBeltMotor.set(0);
+        _intakeMotor.set(0);
 
        }else{
 
@@ -270,7 +283,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
       
       // }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
 
-      //   _drive.tankDrive(_autonMotorSpeed, _autonMotorSpeed);
+      //   _drive.tankDrive(_autonDriveSpeed, _autonDriveSpeed);
       
       // }else{
 
