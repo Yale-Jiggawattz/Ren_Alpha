@@ -126,6 +126,8 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   private WPI_VictorSPX _leftLaunchMotor = new WPI_VictorSPX(6);
   private WPI_VictorSPX _rightLaunchMotor = new WPI_VictorSPX(5);
 
+  private DigitalInput _intakeSwitch = new DigitalInput(2);
+
 //Limelight--------------------------------------------------------------------------------------------
 
   private boolean _limelightHasValidTarget = false;
@@ -338,7 +340,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
      
   //Launcher----------------------------------------------------------------------------------------------------------------------
     
-    if(_intakeTog.toggleHeld(_joystick, _intakeInt)){
+    if(_intakeTog.toggleHeld(_joystick, _intakeInt) && _intakeSwitch.get()){
       
       _intakeMotor.set(_intakeSpeed);
       
