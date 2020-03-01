@@ -49,14 +49,15 @@ public class Robot extends TimedRobot {
 
   private Integer _intakeInt = 3;
   private Integer _launchInt = 1;
-  private Integer _lowLaunchInt = 5;
-  private Integer _reverseInt = 4;
+  private Integer _beltInt = 4;
+  private Integer _lowLaunchInt = 11;
+  private Integer _reverseInt = 5;
 
-  private Integer _reverseAxisInt = 6; 
+  private Integer _reverseAxisInt = 2; 
 
-  private Integer _wheelSpinnerInt = 7;
+  private Integer _wheelSpinnerInt = 2;
 
-  private Integer _limelightInt = 2;
+  private Integer _limelightInt = 6;
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
@@ -70,21 +71,21 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 //Motor Speeds
 
   private Double _upClimbMotorSpeed = 0.7;
-  private Double _downClimbMotorSpeed = 0.8; 
+  private Double _downClimbMotorSpeed = -0.8; 
   
-  private Double _launcherSpeed = 0.95;
-  private Double _lowLauncherSpeed = 0.2;
+  private Double _launcherSpeed = -1.0;
+  private Double _lowLauncherSpeed = -0.15;
 
-  private Double _intakeSpeed = 0.42; 
-  private Double _intakeRevSpeed = -0.42;
-  private Double _topBeltSpeed = 0.9;
-  private Double _bottomBeltSpeed = 0.9;
+  private Double _intakeSpeed = 0.6; 
+  private Double _intakeRevSpeed = -0.6;
+  private Double _topBeltSpeed = 0.75;
+  private Double _bottomBeltSpeed = -0.6;
   private Double _topRevBeltSpeed = -0.5;
   private Double _bottomRevBeltSpeed = -0.5;
 
   private Double _wheelSpinSpeed = 0.1;
 
-  private Double _autonDriveSpeed = -0.2;
+  private Double _autonDriveSpeed = -0.45;
 
 //Toggle--------------------------------------------------------------------------------------------------------------------------------------
   
@@ -95,6 +96,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   private Toggle _launchTog = new Toggle();
   private Toggle _lowLaunchTog = new Toggle();
   private Toggle _reverseTog = new Toggle();
+  private Toggle _beltTog = new Toggle();
 
   private Toggle _reverseAxisTog = new Toggle();
 
@@ -114,7 +116,8 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
 //Controls-----------------------------------------------------------------------------------------------------------------------------
   
-  private Joystick _joystick = new Joystick(0); 
+  private Joystick _joystick1 = new Joystick(0); 
+  private Joystick _joystick2 = new Joystick(1);
 
 //Launcher-------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,7 +129,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   private WPI_VictorSPX _leftLaunchMotor = new WPI_VictorSPX(6);
   private WPI_VictorSPX _rightLaunchMotor = new WPI_VictorSPX(5);
 
-  private DigitalInput _intakeSwitch = new DigitalInput(2);
+  private DigitalInput _beltSwitch = new DigitalInput(2);
 
 //Limelight--------------------------------------------------------------------------------------------
 
@@ -170,10 +173,10 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
     _backLeftMotor.follow(_frontLeftMotor);
     _backRightMotor.follow(_frontRightMotor);
 
-    _backLeftMotor.setNeutralMode(NeutralMode.Brake);
-    _backRightMotor.setNeutralMode(NeutralMode.Brake);
-    _frontLeftMotor.setNeutralMode(NeutralMode.Brake);
-    _frontRightMotor.setNeutralMode(NeutralMode.Brake);
+    // _backLeftMotor.setNeutralMode(NeutralMode.Brake);
+    // _backRightMotor.setNeutralMode(NeutralMode.Brake);
+    // _frontLeftMotor.setNeutralMode(NeutralMode.Brake);
+    // _frontRightMotor.setNeutralMode(NeutralMode.Brake);
 
   //Launcher-----------------------------------------------------------------------------------------
 
@@ -206,7 +209,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   @Override
   public void robotPeriodic() {
 
-    System.out.println(_frontLeftMotor.getSelectedSensorPosition());
+    //System.out.println(_frontLeftMotor.getSelectedSensorPosition());
 
   }
 
@@ -248,8 +251,13 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
        if (_autonTimer.get() < 5.0){
 
          _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
+         _leftLaunchMotor.set(0);
+         _rightLaunchMotor.set(0);
+         _topBeltMotor.set(0);
+         _bottomBeltMotor.set(0);
+         _intakeMotor.set(0);
 
-       }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 13.0){
+       }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 10.0){
 
         _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
         _leftLaunchMotor.set(_launcherSpeed);
@@ -258,7 +266,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
         _bottomBeltMotor.set(_bottomBeltSpeed);
         _intakeMotor.set(_intakeSpeed);
 
-       }else if(_autonTimer.get() > 13.0 && _autonTimer.get() < 15){
+       }else if(_autonTimer.get() > 12.0 && _autonTimer.get() < 15.0){
 
         _drive.arcadeDrive(_autonDriveSpeed, 0);
         _leftLaunchMotor.set(0);
@@ -307,27 +315,27 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
-    if(_reverseAxisTog.togglePressed(_joystick, _reverseAxisInt)){
+    if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
 
-      _drive.arcadeDrive(_joystick.getY(),- _joystick.getX());
+       _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
     
-  }else if(_limelightTestTog.toggleHeld(_joystick, _limelightInt) && _limelightHasValidTarget){
+   }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
 
-    _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
+     _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
   
-  }else{
+   }else{
 
-      _drive.arcadeDrive(-_joystick.getY(), -_joystick.getX());
+      _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
 
-    }    
+     }    
 
   //Climber----------------------------------------------------------------------------------------------
 
-    if(_upClimbTog.toggleHeld(_joystick, _upClimbInt) && _bottomSwitch.get()){
+    if(_upClimbTog.toggleHeld(_joystick2, _upClimbInt) && _bottomSwitch.get()){
 
       _upClimbMotor.set(ControlMode.PercentOutput, _upClimbMotorSpeed);
     
-  }else if(_downClimbTog.toggleHeld(_joystick, _downClimbInt) && _topSwitch.get()){
+  }else if(_downClimbTog.toggleHeld(_joystick2, _downClimbInt) && _topSwitch.get()){
 
       _downClimbMotor.set(ControlMode.PercentOutput, _downClimbMotorSpeed);
 
@@ -340,44 +348,55 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
      
   //Launcher----------------------------------------------------------------------------------------------------------------------
     
-    if(_intakeTog.toggleHeld(_joystick, _intakeInt) && _intakeSwitch.get()){
+    if(_intakeTog.toggleHeld(_joystick1, _intakeInt) && _beltSwitch.get()){
       
       _intakeMotor.set(_intakeSpeed);
       
-  }else if(_launchTog.toggleHeld(_joystick, _launchInt)){
+  }if(_launchTog.toggleHeld(_joystick1, _launchInt)){
       
       _leftLaunchMotor.set(_launcherSpeed);
       _rightLaunchMotor.set(_launcherSpeed);
       _topBeltMotor.set(_topBeltSpeed);
       _bottomBeltMotor.set(_bottomBeltSpeed);
 
-  }else if(_reverseTog.toggleHeld(_joystick, _reverseInt)){
+  }if(_reverseTog.toggleHeld(_joystick1, _reverseInt)){
       
       _topBeltMotor.set(_topRevBeltSpeed);
-      _bottomBeltMotor.set(_bottomRevBeltSpeed);
+      _bottomBeltMotor.set(-_bottomRevBeltSpeed);
       _intakeMotor.set(_intakeRevSpeed);
+      
     
-  }else if(_lowLaunchTog.toggleHeld(_joystick, _lowLaunchInt)){
+  }if(_lowLaunchTog.toggleHeld(_joystick1, _lowLaunchInt)){
 
       _leftLaunchMotor.set(_lowLauncherSpeed);
       _rightLaunchMotor.set(_lowLauncherSpeed);
       _topBeltMotor.set(_topBeltSpeed);
       _bottomBeltMotor.set(_bottomBeltSpeed);
 
-  }else{
+  }if(_beltTog.toggleHeld(_joystick1, _beltInt)){
+
+      _topBeltMotor.set(_topBeltSpeed);
+      _bottomBeltMotor.set(_bottomBeltSpeed);
+        
+  }if(!_launchTog.toggleHeld(_joystick1, _launchInt)){
       
       _leftLaunchMotor.set(0);
       _rightLaunchMotor.set(0);
-      _topBeltMotor.set(0);
-      _intakeMotor.set(0);
       _leftLaunchMotor.setNeutralMode(NeutralMode.Brake);
       _rightLaunchMotor.setNeutralMode(NeutralMode.Brake);
-    
-    }
+
+  }if(!_launchTog.toggleHeld(_joystick1, _launchInt) && !_reverseTog.toggleHeld(_joystick1, _reverseInt) && !_lowLaunchTog.toggleHeld(_joystick1, _lowLaunchInt) && !_beltTog.toggleHeld(_joystick1, _beltInt)){
+      _topBeltMotor.set(0);
+      _bottomBeltMotor.set(0);
+      
+  }if((!_intakeTog.toggleHeld(_joystick1, _intakeInt) && !_reverseTog.toggleHeld(_joystick1, _reverseInt)) || !_beltSwitch.get()){
+      _intakeMotor.set(0);
+  
+  }
 
   //Wheel spinner---------------------------------------------------------------------------------------------
   
-  if(_wheelSpinTog.toggleHeld(_joystick, _wheelSpinnerInt)){
+  if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt)){
     
     _colorWheelMotor.set(_wheelSpinSpeed);
 
@@ -429,12 +448,11 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
   public void Update_Limelight_Tracking(){
 
-    final double _steerspeed = 0.26;
-    final double _drivespeed = 0.26;
+    final double _steerspeed = 0.4;
+    final double _drivespeed = 0.25;
     final double _desired_Target_Area = 1.0; 
-    final double _max_drivespeed = 0.7;
-    final double _max_steerspeed = 0.7;
-
+    final double _max_drivespeed = 0.55;
+    final double _max_steerspeed = 0.65;
     
     double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
     double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
@@ -452,12 +470,21 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
     _limelightHasValidTarget = true;
 
     double _steercmd = tx * _steerspeed;
-    _limelightSteerCommand = _steercmd;
 
-      if(_steercmd > _max_steerspeed){
+      if(_steercmd > 0 && _steercmd > _max_steerspeed){
 
         _steercmd = _max_steerspeed;
+
+      }else if(_steercmd < 0 && _steercmd < -_max_steerspeed){
+
+        _steercmd = -_max_steerspeed;
+
       }
+
+      _limelightSteerCommand = _steercmd;
+      //System.out.println("Lime_Cmd= " + _limelightSteerCommand);
+      //System.out.println("Lime_Tgt= " + _limelightHasValidTarget);
+ 
 
     double _drivecmd = (_desired_Target_Area - ta) * _drivespeed;
 
