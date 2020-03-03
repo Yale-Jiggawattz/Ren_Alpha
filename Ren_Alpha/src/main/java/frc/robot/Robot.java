@@ -465,7 +465,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
        case 'R' :
 
-       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color == _redVal){
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _redVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
 
@@ -474,7 +474,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
        case 'Y' :
 
-       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color == _yellowVal){
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _yellowVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
 
