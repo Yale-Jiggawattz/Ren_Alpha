@@ -489,8 +489,7 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
      }
    }else{
 
-
-   }
+  }
   }
 
   /**
