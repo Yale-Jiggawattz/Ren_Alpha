@@ -282,25 +282,6 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
        }
         break;
 
-      //case _shootingAuton:
-      // default:
-      
-      // if (_autonTimer.get() < 10.0){
-
-      //   _leftLaunchMotor.set(_launcherSpeed);
-      //   _rightLaunchMotor.set(_launcherSpeed);
-      //   _topBeltMotor.set(_topBeltSpeed);
-        
-      
-      // }else if (_autonTimer.get() > 10.00 && _autonTimer.get() < 15.0){
-
-      //   _drive.tankDrive(_autonDriveSpeed, _autonDriveSpeed);
-      
-      // }else{
-
-      //   _drive.tankDrive(0, 0);
-      // }
-      //   break;
     }
   }
 
@@ -311,8 +292,6 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   public void teleopPeriodic() {
 
     Update_Limelight_Tracking();
-
-    Color _detectedColor = _colorSensor.getColor();
 
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
@@ -398,36 +377,26 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   
   }
 
-  //Wheel spinner---------------------------------------------------------------------------------------------
-  
-  if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt)){
-    
-    _colorWheelMotor.set(_wheelSpinSpeed);
+  //Color Sensor-------------------------------------------------------------------------------------------------------------------------
 
-  }else{
-
-    _colorWheelMotor.set(0);
-    
-  }
-
-  //Color String Test
+  Color _detectedColor = _colorSensor.getColor();
 
   String _colorString;
-  ColorMatchResult _match = _colorMatcher.matchClosestColor(_detectedColor);
+  ColorMatchResult _colorSensorResult = _colorMatcher.matchClosestColor(_detectedColor);
 
-  if(_match.color == _blueVal){
+  if(_colorSensorResult.color == _blueVal){
 
     _colorString = "Blue";
 
-  }else if(_match.color == _redVal){
+  }else if(_colorSensorResult.color == _redVal){
 
     _colorString = "Red";
 
-  }else if(_match.color == _greenVal){
+  }else if(_colorSensorResult.color == _greenVal){
 
     _colorString = "Green";
 
-  }else if (_match.color == _yellowVal){
+  }else if (_colorSensorResult.color == _yellowVal){
 
     _colorString = "Yellow";
 
@@ -439,41 +408,89 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   SmartDashboard.putNumber("Red", _detectedColor.red);
   SmartDashboard.putNumber("Green", _detectedColor.green);
   SmartDashboard.putNumber("Blue", _detectedColor.blue);
-  SmartDashboard.putNumber("Confidence", _match.confidence);
+  SmartDashboard.putNumber("Confidence", _colorSensorResult.confidence);
   SmartDashboard.putString("Detected Color", _colorString);
 
   String _gameData;
+  
   _gameData = DriverStation.getInstance().getGameSpecificMessage();
   SmartDashboard.putString("Field Color", _gameData);
 
-  if(_gameData.length() > 0){
+  //Wheel spinner---------------------------------------------------------------------------------------------
+  
+  // if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Blue" && _colorString != "Blue"){
+    
+  //   _colorWheelMotor.set(_wheelSpinSpeed);
 
-    switch (_gameData.charAt(0)){
+  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Red" && _colorString != "Red"){
 
-      case 'B' :
+  //   _colorWheelMotor.set(_wheelSpinSpeed);
+    
+  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Green" && _colorString != "Green"){
 
-      break;
+  //   _colorWheelMotor.set(_wheelSpinSpeed);
 
-      case 'G' :
+  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Yellow" && _colorString != "Yellow"){
 
-      break;
+  //   _colorWheelMotor.set(_wheelSpinSpeed);
 
-      case 'R' :
+  // }else{
 
-      break;
+  //   _colorWheelMotor.set(0);
 
-      case 'Y' :
+  // }
 
-      break;
+   if(_gameData.length() > 0){
 
-      default :
+     switch (_gameData.charAt(0)){
 
-      break;
-    }
-  }else{
+       case 'B' :
+
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) &&  _colorSensorResult.color != _blueVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+        _colorString = "Blue";
+
+       }
+       break;
+
+       case 'G' :
+
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _greenVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+
+       }
+       break;
+
+       case 'R' :
+
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color == _redVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+
+       }
+       break;
+
+       case 'Y' :
+
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color == _yellowVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+
+       }
+       break;
+
+       default :
+
+       _colorWheelMotor.set(0);
+
+       break;
+     }
+   }else{
 
 
-  }
+   }
   }
 
   /**
