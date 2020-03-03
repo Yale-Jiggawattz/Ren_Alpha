@@ -19,6 +19,7 @@ import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -318,14 +319,17 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
     if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
 
        _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
+       NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     
    }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
 
      _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
+     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
   
    }else{
 
       _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
      }    
 
@@ -437,6 +441,39 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   SmartDashboard.putNumber("Blue", _detectedColor.blue);
   SmartDashboard.putNumber("Confidence", _match.confidence);
   SmartDashboard.putString("Detected Color", _colorString);
+
+  String _gameData;
+  _gameData = DriverStation.getInstance().getGameSpecificMessage();
+  SmartDashboard.putString("Field Color", _gameData);
+
+  if(_gameData.length() > 0){
+
+    switch (_gameData.charAt(0)){
+
+      case 'B' :
+
+      break;
+
+      case 'G' :
+
+      break;
+
+      case 'R' :
+
+      break;
+
+      case 'Y' :
+
+      break;
+
+      default :
+
+      break;
+    }
+  }else{
+
+
+  }
   }
 
   /**
@@ -459,7 +496,9 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
     double ty = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
     double ta = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
 
+
     if(tv < 1.0){
+    
 
       _limelightHasValidTarget = false;
       _limelightDriveCommand = 0.0;
