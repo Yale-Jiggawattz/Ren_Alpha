@@ -68,6 +68,8 @@ private final Color _blueVal = ColorMatch.makeColor(0.143, 0.427, 0.429);
 private final Color _greenVal = ColorMatch.makeColor(0.197, 0.561, 0.240);
 private final Color _redVal = ColorMatch.makeColor(0.561, 0.232, 0.114);
 private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
+private boolean _countSpins = false;
+private double _halfSpins = 0;
 
 //Motor Speeds
 
@@ -417,74 +419,72 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
   SmartDashboard.putString("Field Color", _gameData);
 
   //Wheel spinner---------------------------------------------------------------------------------------------
-  
-  // if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Blue" && _colorString != "Blue"){
-    
-  //   _colorWheelMotor.set(_wheelSpinSpeed);
-
-  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Red" && _colorString != "Red"){
-
-  //   _colorWheelMotor.set(_wheelSpinSpeed);
-    
-  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Green" && _colorString != "Green"){
-
-  //   _colorWheelMotor.set(_wheelSpinSpeed);
-
-  // }else if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && DriverStation.getInstance().getGameSpecificMessage() == "Yellow" && _colorString != "Yellow"){
-
-  //   _colorWheelMotor.set(_wheelSpinSpeed);
-
-  // }else{
-
-  //   _colorWheelMotor.set(0);
-
-  // }
 
    if(_gameData.length() > 0){
 
      switch (_gameData.charAt(0)){
 
-       case 'B' :
+       case 'R' :
 
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) &&  _colorSensorResult.color != _blueVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
-        _colorString = "Blue";
 
-       }
-       break;
+       }else{
 
-       case 'G' :
-
-       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _greenVal){
-    
-        _colorWheelMotor.set(_wheelSpinSpeed);
-
-       }
-       break;
-
-       case 'R' :
-
-       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _redVal){
-    
-        _colorWheelMotor.set(_wheelSpinSpeed);
-
+        _colorWheelMotor.set(0);
        }
        break;
 
        case 'Y' :
 
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _greenVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+
+       }else{
+
+        _colorWheelMotor.set(0);
+       }
+
+       break;
+
+       case 'B' :
+
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _redVal){
+    
+        _colorWheelMotor.set(_wheelSpinSpeed);
+
+       }else{
+
+        _colorWheelMotor.set(0);
+       }
+
+       break;
+
+       case 'G' :
+
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _yellowVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
 
+       }else{
+
+        _colorWheelMotor.set(0);
        }
+
        break;
 
        default :
 
-       _colorWheelMotor.set(0);
+       if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt)){
+        
+        _colorWheelMotor.set(_wheelSpinSpeed);
 
+       }else{
+
+       _colorWheelMotor.set(0);
+       }
        break;
      }
    }else{
