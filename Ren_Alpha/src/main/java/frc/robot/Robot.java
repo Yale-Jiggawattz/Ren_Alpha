@@ -59,6 +59,7 @@ public class Robot extends TimedRobot {
   private Integer _wheelSpinnerInt = 2;
 
   private Integer _limelightInt = 6;
+  private Integer _limelightPowerInt = 9;
 
 //Encoder Values--------------------------------------------------------------------------------------------------------------------------
 
@@ -71,12 +72,15 @@ private final Color _yellowVal = ColorMatch.makeColor(0.361, 0.524, 0.113);
 private boolean _countSpins = false;
 private double _halfSpins = 0;
 
+public double _numberofSpins;
+public double _numberofYellow;
+
 //Motor Speeds
 
   private Double _upClimbMotorSpeed = 0.7;
   private Double _downClimbMotorSpeed = -0.8; 
   
-  private Double _launcherSpeed = -1.0;
+  private Double _launcherSpeed = -0.75;
   private Double _lowLauncherSpeed = -0.15;
 
   private Double _intakeSpeed = 0.6; 
@@ -86,7 +90,8 @@ private double _halfSpins = 0;
   private Double _topRevBeltSpeed = -0.5;
   private Double _bottomRevBeltSpeed = -0.5;
 
-  private Double _wheelSpinSpeed = 0.1;
+  private Double _wheelSpinSpeed = 0.15;
+  private Double _wheelSpinDriveSpeed = 0.2;
 
   private Double _autonDriveSpeed = -0.45;
 
@@ -106,6 +111,7 @@ private double _halfSpins = 0;
   private Toggle _wheelSpinTog = new Toggle();
 
   private Toggle _limelightTestTog = new Toggle();
+  private Toggle _limelightPowerTog = new Toggle();
 
 //Drive Train----------------------------------------------------------------------------------------------------------------------------
   
@@ -194,10 +200,13 @@ private double _halfSpins = 0;
 
     _colorWheelMotor.setNeutralMode(NeutralMode.Brake);
 
-  _colorMatcher.addColorMatch(_blueVal);
-  _colorMatcher.addColorMatch(_greenVal);
-  _colorMatcher.addColorMatch(_redVal);
-  _colorMatcher.addColorMatch(_yellowVal);
+    _colorMatcher.addColorMatch(_blueVal);
+    _colorMatcher.addColorMatch(_greenVal);
+    _colorMatcher.addColorMatch(_redVal);
+    _colorMatcher.addColorMatch(_yellowVal);
+
+    _numberofYellow = 0;
+    _numberofSpins = 0;
 
   }
 
@@ -259,6 +268,7 @@ private double _halfSpins = 0;
          _topBeltMotor.set(0);
          _bottomBeltMotor.set(0);
          _intakeMotor.set(0);
+         NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
        }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 10.0){
 
@@ -267,20 +277,21 @@ private double _halfSpins = 0;
         _rightLaunchMotor.set(_launcherSpeed);
         _topBeltMotor.set(_topBeltSpeed);
         _bottomBeltMotor.set(_bottomBeltSpeed);
-        _intakeMotor.set(_intakeSpeed);
+        _intakeMotor.set(_intakeSpeed);NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
-       }else if(_autonTimer.get() > 12.0 && _autonTimer.get() < 15.0){
+       }else if(_autonTimer.get() > 10.0 && _autonTimer.get() < 15.0){
 
         _drive.arcadeDrive(_autonDriveSpeed, 0);
         _leftLaunchMotor.set(0);
         _rightLaunchMotor.set(0);
         _topBeltMotor.set(0);
         _bottomBeltMotor.set(0);
-        _intakeMotor.set(0);
+        _intakeMotor.set(0);NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
 
        }else{
 
         _drive.arcadeDrive(0, 0);
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
        }
         break;
 
@@ -297,22 +308,24 @@ private double _halfSpins = 0;
 
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
-    if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
+  //   if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
 
-       _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
-       NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+  //      _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
+  //      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     
-   }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
+  //  }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
 
-     _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
-     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+  //    _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
+  //    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
   
-   }else{
+  //  }else{
 
-      _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
-      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+  //     _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
+  //     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
-     }    
+  //    }    
+
+  _drivetrainFunctions();
 
   //Climber----------------------------------------------------------------------------------------------
 
@@ -401,6 +414,7 @@ private double _halfSpins = 0;
   }else if (_colorSensorResult.color == _yellowVal){
 
     _colorString = "Yellow";
+    
 
   }else{
 
@@ -429,10 +443,12 @@ private double _halfSpins = 0;
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) &&  _colorSensorResult.color != _blueVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
+        _drive.arcadeDrive(_wheelSpinDriveSpeed, 0);
 
        }else{
 
         _colorWheelMotor.set(0);
+        _drivetrainFunctions();
        }
        break;
 
@@ -441,10 +457,12 @@ private double _halfSpins = 0;
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _greenVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
+        _drive.arcadeDrive(_wheelSpinDriveSpeed, 0);
 
        }else{
 
         _colorWheelMotor.set(0);
+        _drivetrainFunctions();
        }
 
        break;
@@ -454,10 +472,12 @@ private double _halfSpins = 0;
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _redVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
+        _drive.arcadeDrive(_wheelSpinDriveSpeed, 0);
 
        }else{
 
         _colorWheelMotor.set(0);
+        _drivetrainFunctions();
        }
 
        break;
@@ -467,10 +487,12 @@ private double _halfSpins = 0;
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt) && _colorSensorResult.color != _yellowVal){
     
         _colorWheelMotor.set(_wheelSpinSpeed);
+        _drive.arcadeDrive(_wheelSpinDriveSpeed, 0);
 
        }else{
 
         _colorWheelMotor.set(0);
+        _drivetrainFunctions();
        }
 
        break;
@@ -480,11 +502,70 @@ private double _halfSpins = 0;
        if(_wheelSpinTog.toggleHeld(_joystick1, _wheelSpinnerInt)){
         
         _colorWheelMotor.set(_wheelSpinSpeed);
+        _drive.arcadeDrive(_wheelSpinDriveSpeed, 0);
 
        }else{
 
        _colorWheelMotor.set(0);
+       _drivetrainFunctions();
        }
+
+      //  if(_colorSensorResult.color == _yellowVal){
+
+      //   _numberofYellow = 1;
+        
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 1){
+
+      //   _numberofYellow = 2;
+      //   _numberofSpins = 1;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 2){
+
+      //   _numberofYellow = 3;
+        
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 3){
+
+      //   _numberofYellow = 4;
+      //   _numberofSpins = 2;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 4){
+
+      //   _numberofYellow = 5;
+       
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 5){
+
+      //   _numberofYellow = 6;
+      //   _numberofSpins = 3;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 6){
+
+      //   _numberofYellow = 7;
+        
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 7){
+
+      //   _numberofYellow = 8;
+      //   _numberofSpins = 4;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 8){
+
+      //   _numberofYellow = 9;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofYellow == 9){
+
+      //   _numberofYellow = 10;
+      //   _numberofSpins = 5;
+
+      //  }else if(_colorSensorResult.color == _yellowVal && _numberofSpins == 5){
+
+      //   _numberofYellow = 0;
+      //   _numberofSpins = 0;
+
+      //  }else{
+
+      //   _numberofYellow = 0;
+      //   _numberofSpins = 0;
+      //  }
+        
        break;
      }
    }else{
@@ -551,4 +632,33 @@ private double _halfSpins = 0;
      _limelightDriveCommand = _drivecmd;
 
    }
+  
+  public void _drivetrainFunctions(){
+
+    if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
+
+      _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+   
+  }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
+
+    _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+ 
+  }else{
+
+     _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
+     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+
+    }
+
+    // if(_limelightPowerTog.togglePressed(_joystick1, _limelightPowerInt)){
+
+    //   NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+
+    // }else{
+
+    //   NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+    // }
+  }
 }
