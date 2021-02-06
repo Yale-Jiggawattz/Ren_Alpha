@@ -77,7 +77,7 @@ public double _numberofYellow;
 
 //Motor Speeds
 
-  private Double _upClimbMotorSpeed = 0.7;
+  private Double _upClimbMotorSpeed = 0.8;
   private Double _downClimbMotorSpeed = -0.8; 
   
   private Double _launcherSpeed = -0.75;
@@ -272,7 +272,7 @@ public double _numberofYellow;
 
        }else if(_autonTimer.get() > 5.0 && _autonTimer.get() < 10.0){
 
-        _drive.arcadeDrive(_limelightDriveCommand, -_limelightSteerCommand);
+        _drive.arcadeDrive(0, 0);
         _leftLaunchMotor.set(_launcherSpeed);
         _rightLaunchMotor.set(_launcherSpeed);
         _topBeltMotor.set(_topBeltSpeed);
@@ -308,22 +308,22 @@ public double _numberofYellow;
 
     //Drive_Train-----------------------------------------------------------------------------------------------------------------------
 
-  //   if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
+    //  if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
 
-  //      _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
-  //      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    //     _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
+    //     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     
-  //  }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
+    // }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
 
-  //    _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
-  //    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+    //   _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
+    //   NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
   
-  //  }else{
+    // }else{
 
-  //     _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
-  //     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
+    //    _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
+    //    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
-  //    }    
+    //   }    
 
   _drivetrainFunctions();
 
@@ -635,19 +635,19 @@ public double _numberofYellow;
   
   public void _drivetrainFunctions(){
 
-    if(_reverseAxisTog.togglePressed(_joystick2, _reverseAxisInt)){
+    if(_reverseAxisTog.togglePressed(_joystick1, _reverseAxisInt)){
 
-      _drive.arcadeDrive(_joystick2.getY(),- _joystick2.getX());
+      _drive.arcadeDrive(_joystick1.getY(),- _joystick1.getX());
       NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
    
   }else if(_limelightTestTog.toggleHeld(_joystick1, _limelightInt) && _limelightHasValidTarget){
 
-    _drive.arcadeDrive(-_joystick2.getY(), -_limelightSteerCommand);
+    _drive.arcadeDrive(-_joystick1.getY(), -_limelightSteerCommand);
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
  
   }else{
 
-     _drive.arcadeDrive(-_joystick2.getY(), -_joystick2.getX());
+     _drive.arcadeDrive(-_joystick1.getY(), -_joystick1.getX());
      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(0);
 
     }
